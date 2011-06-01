@@ -1,0 +1,28 @@
+
+init-knowledge( "jdbc:mysql:///sudoku" "root" "root" );
+
+add-iterative-domain( "col" "select distinct( col ) from ( select sc.col, count( * ) as count from sudoku_cell sc left join tuple t on sc.col = t.col and sc.row = t.row, my_values mv where mv.some_assignment not in ( select t.assignment from tuple t where t.col = sc.col ) and mv.some_assignment not in ( select t.assignment from tuple t where t.row = sc.row ) and mv.some_assignment not in ( select t.assignment from tuple t where t.block = sc.block ) and t.assignment is null group by sc.col, sc.row order by count asc ) as subq" );
+add-iterative-domain( "row" "select distinct( row ) from ( select sc.row, count( * ) as count from sudoku_cell sc left join tuple t on sc.col = t.col and sc.row = t.row, my_values mv where mv.some_assignment not in ( select t.assignment from tuple t where t.col = sc.col ) and mv.some_assignment not in ( select t.assignment from tuple t where t.row = sc.row ) and mv.some_assignment not in ( select t.assignment from tuple t where t.block = sc.block ) and t.assignment is null and sc.col = %s group by sc.col, sc.row order by count asc ) as subq" );
+add-argument-to-domain( "row" "col" );
+
+add-normal-domain( "block" "SELECT sc.block from sudoku_cell sc where sc.col = %s and sc.row = %s" );
+add-argument-to-domain( "block" "col" );
+add-argument-to-domain( "block" "row" );
+
+add-normal-domain( "possibilities" "SELECT mv.some_assignment FROM my_values mv where mv.some_assignment not in ( select t.assignment from tuple t where t.col = %s ) and mv.some_assignment not in ( select t.assignment from tuple t where t.row = %s ) and mv.some_assignment not in ( select t.assignment from tuple t where t.block = %s ) and mv.some_assignment in ( select mv2.some_assignment from my_values mv2, ( SELECT count(*) as mynum, some_assignment, row, col FROM ( SELECT count( * ) as num, mv3.some_assignment, sc.row, sc.col FROM sudoku_cell sc LEFT JOIN tuple t ON sc.col = t.col AND sc.row = t.row, my_values mv3 WHERE mv3.some_assignment NOT IN ( SELECT t.assignment FROM tuple t WHERE t.col = sc.col ) AND mv3.some_assignment NOT IN ( SELECT t.assignment FROM tuple t WHERE t.row = sc.row ) AND mv3.some_assignment NOT IN ( SELECT t.assignment FROM tuple t WHERE t.block = sc.block ) AND t.assignment is null AND sc.block = %s GROUP BY mv3.some_assignment HAVING num = 1 ) as numcount ) as nc WHERE ( mv2.some_assignment = nc.some_assignment AND nc.mynum = 1 AND nc.col = %s AND nc.row = %s ) or ( nc.col <> %s OR nc.row <> %s ) or ( nc.mynum = 0 ) )" );
+add-argument-to-domain( "possibilities" "col" );
+add-argument-to-domain( "possibilities" "row" );
+add-argument-to-domain( "possibilities" "block" );
+add-argument-to-domain( "possibilities" "block" );
+add-argument-to-domain( "possibilities" "col" );
+add-argument-to-domain( "possibilities" "row" );
+add-argument-to-domain( "possibilities" "col" );
+add-argument-to-domain( "possibilities" "row" );
+
+add-direct-assertion( "INSERT into tuple ( col, row, block, assignment ) values ( %s, %s, %s, %s )" "delete from tuple where col = %s and row = %s"  "col" "row" "block" "possibilities" );
+
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "47" );
+post-goal( "insert into solution select %s, %s, col, row, block, assignment from tuple" );
+
+set-output-graph-file( "/home/gt/Desktop/sudoku.dot" );
+go();

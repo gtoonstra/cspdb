@@ -1,0 +1,23 @@
+
+init-knowledge( "jdbc:mysql:///sudoku" "root" "root" );
+
+add-normal-domain( "col" "SELECT distinct( sc.col ) from sudoku_cell sc left join tuple t on sc.col = t.col and sc.row = t.row where t.col is null " );
+add-normal-domain( "row" "SELECT distinct( sc.row ) from sudoku_cell sc left join tuple t on sc.col = t.col and sc.row = t.row where t.row is null and sc.col = %s" );
+add-argument-to-domain( "row" "col" );
+
+add-normal-domain( "block" "SELECT sc.block from sudoku_cell sc where sc.col = %s and sc.row = %s" );
+add-argument-to-domain( "block" "col" );
+add-argument-to-domain( "block" "row" );
+
+add-normal-domain( "possibilities" "SELECT mv.some_assignment FROM my_values mv where mv.some_assignment not in ( select t.assignment from tuple t where t.col = %s ) and mv.some_assignment not in ( select t.assignment from tuple t where t.row = %s ) and mv.some_assignment not in ( select t.assignment from tuple t where t.block = %s )" );
+add-argument-to-domain( "possibilities" "col" );
+add-argument-to-domain( "possibilities" "row" );
+add-argument-to-domain( "possibilities" "block" );
+
+add-direct-assertion( "INSERT into tuple ( col, row, block, assignment ) values ( %s, %s, %s, %s )" "delete from tuple where col = %s and row = %s"  "col" "row" "block" "possibilities" );
+
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "49" );
+post-goal( "insert into solution select %s, %s, col, row, block, assignment from tuple" );
+
+set-output-graph-file( "/home/gt/Desktop/sudoku.dot" );
+go();

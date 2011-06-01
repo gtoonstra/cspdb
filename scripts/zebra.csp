@@ -1,0 +1,89 @@
+
+init-knowledge( "jdbc:mysql:///zebra" "root" "root" );
+
+add-iterative-domain( "house" "select h.house_id from house h where h.house_id not in ( select t.house_id from tuple t )" );
+
+add-normal-domain( "color" "select c.color_id from color c where c.color_id not in ( select t.color_id from tuple t ) and c.color_id not in ( select hr.color_id from house_relations hr where ( hr.house_id is not null and hr.house_id <> %s) and hr.color_id is not null ) and c.color_id in (select hr.color_id from house_relations hr, ( select count(*) as num from house_relations hr where hr.color_id is not null and hr.house_id = %s ) as numcolors where ( hr.color_id is not null and hr.house_id = %s and numcolors.num = 1 ) or ( 0 = numcolors.num )) and c.color_id not in (select hr2.color_id from house_relations hr1, tuple t, rel_next_rel rlr, house_relations hr2 where ( hr1.house_id = t.house_id or hr1.color_id = t.color_id or hr1.nat_id = t.nat_id or hr1.drink_id = t.drink_id or hr1.smoke_id = t.smoke_id or hr1.pet_id = t.pet_id ) and rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and abs(t.house_id - %s) <> 1 and hr2.color_id is not null) and c.color_id not in( select hr2.color_id from house_relations hr1, rel_next_rel rlr, house_relations hr2 where rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and (hr1.house_id = %s) and hr2.color_id is not null )" );
+add-argument-to-domain( "color" "house" );
+add-argument-to-domain( "color" "house" );
+add-argument-to-domain( "color" "house" );
+add-argument-to-domain( "color" "house" );
+add-argument-to-domain( "color" "house" );
+
+add-normal-domain( "nationality" "select n.nat_id from nationality n where n.nat_id not in ( select t.nat_id from tuple t ) and n.nat_id not in ( select hr.nat_id from house_relations hr where ((hr.house_id is not null and hr.house_id <> %s) or ( hr.color_id is not null and hr.color_id <> %s )) and hr.nat_id is not null ) and n.nat_id in (select hr.nat_id from house_relations hr, (select count(*) as num from house_relations hr where hr.nat_id is not null and (hr.house_id = %s or hr.color_id = %s) ) as numcolors where ( hr.nat_id is not null and numcolors.num = 1 and (hr.house_id = %s or hr.color_id = %s)) or ( 0 = numcolors.num )) and n.nat_id not in (select hr2.nat_id from house_relations hr1, tuple t, rel_next_rel rlr, house_relations hr2 where ( hr1.house_id = t.house_id or hr1.color_id = t.color_id or hr1.nat_id = t.nat_id or hr1.drink_id = t.drink_id or hr1.smoke_id = t.smoke_id or hr1.pet_id = t.pet_id ) and rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and abs(t.house_id - %s) <> 1 and hr2.nat_id is not null) and n.nat_id not in( select hr2.nat_id from house_relations hr1, rel_next_rel rlr, house_relations hr2 where rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and (hr1.house_id = %s or hr1.color_id = %s) and hr2.nat_id is not null )" );
+add-argument-to-domain( "nationality" "house" );
+add-argument-to-domain( "nationality" "color" );
+add-argument-to-domain( "nationality" "house" );
+add-argument-to-domain( "nationality" "color" );
+add-argument-to-domain( "nationality" "house" );
+add-argument-to-domain( "nationality" "color" );
+add-argument-to-domain( "nationality" "house" );
+add-argument-to-domain( "nationality" "house" );
+add-argument-to-domain( "nationality" "color" );
+
+add-normal-domain( "drink" "select d.drink_id from drink d where d.drink_id not in ( select t.drink_id from tuple t ) and d.drink_id not in ( select hr.drink_id from house_relations hr where ((hr.house_id is not null and hr.house_id <> %s) or ( hr.color_id is not null and hr.color_id <> %s ) or ( hr.nat_id is not null and hr.nat_id <> %s )) and hr.drink_id is not null ) and d.drink_id in (select hr.drink_id from house_relations hr, ( select count(hr.drink_id) as num from house_relations hr where hr.drink_id is not null and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s) ) as numcolors where ( hr.drink_id is not null and numcolors.num = 1 and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s)) or ( 0 = numcolors.num ))  and d.drink_id not in (select hr2.drink_id from house_relations hr1, tuple t, rel_next_rel rlr, house_relations hr2 where ( hr1.house_id = t.house_id or hr1.color_id = t.color_id or hr1.nat_id = t.nat_id or hr1.drink_id = t.drink_id or hr1.smoke_id = t.smoke_id or hr1.pet_id = t.pet_id ) and rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and abs(t.house_id - %s) <> 1 and hr2.drink_id is not null) and d.drink_id not in( select hr2.drink_id from house_relations hr1, rel_next_rel rlr, house_relations hr2 where rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and (hr1.house_id = %s or hr1.color_id = %s or hr1.nat_id = %s) and hr2.drink_id is not null )" );
+add-argument-to-domain( "drink" "house" );
+add-argument-to-domain( "drink" "color" );
+add-argument-to-domain( "drink" "nationality" );
+add-argument-to-domain( "drink" "house" );
+add-argument-to-domain( "drink" "color" );
+add-argument-to-domain( "drink" "nationality" );
+add-argument-to-domain( "drink" "house" );
+add-argument-to-domain( "drink" "color" );
+add-argument-to-domain( "drink" "nationality" );
+add-argument-to-domain( "drink" "house" );
+add-argument-to-domain( "drink" "house" );
+add-argument-to-domain( "drink" "color" );
+add-argument-to-domain( "drink" "nationality" );
+
+add-normal-domain( "smoke" "select s.smoke_id from smoke s where s.smoke_id not in ( select t.smoke_id from tuple t ) and s.smoke_id not in ( select hr.smoke_id from house_relations hr where ((hr.house_id is not null and hr.house_id <> %s) or ( hr.color_id is not null and hr.color_id <> %s ) or ( hr.nat_id is not null and hr.nat_id <> %s ) or ( hr.drink_id is not null and hr.drink_id <> %s )) and hr.smoke_id is not null ) and s.smoke_id in (select hr.smoke_id from house_relations hr, (select count(hr.smoke_id) as num from house_relations hr where hr.smoke_id is not null and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s or hr.drink_id = %s) ) as numcolors where ( hr.smoke_id is not null and numcolors.num = 1 and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s or hr.drink_id = %s)) or ( 0 = numcolors.num )) and s.smoke_id not in (select hr2.smoke_id from house_relations hr1, tuple t, rel_next_rel rlr, house_relations hr2 where ( hr1.house_id = t.house_id or hr1.color_id = t.color_id or hr1.nat_id = t.nat_id or hr1.drink_id = t.drink_id or hr1.smoke_id = t.smoke_id or hr1.pet_id = t.pet_id ) and rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and abs(t.house_id - %s) <> 1 and hr2.smoke_id is not null) and s.smoke_id not in( select hr2.smoke_id from house_relations hr1, rel_next_rel rlr, house_relations hr2 where rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and (hr1.house_id = %s or hr1.color_id = %s or hr1.nat_id = %s or hr1.drink_id = %s) and hr2.smoke_id is not null )" );
+add-argument-to-domain( "smoke" "house" );
+add-argument-to-domain( "smoke" "color" );
+add-argument-to-domain( "smoke" "nationality" );
+add-argument-to-domain( "smoke" "drink" );
+add-argument-to-domain( "smoke" "house" );
+add-argument-to-domain( "smoke" "color" );
+add-argument-to-domain( "smoke" "nationality" );
+add-argument-to-domain( "smoke" "drink" );
+add-argument-to-domain( "smoke" "house" );
+add-argument-to-domain( "smoke" "color" );
+add-argument-to-domain( "smoke" "nationality" );
+add-argument-to-domain( "smoke" "drink" );
+add-argument-to-domain( "smoke" "house" );
+add-argument-to-domain( "smoke" "house" );
+add-argument-to-domain( "smoke" "color" );
+add-argument-to-domain( "smoke" "nationality" );
+add-argument-to-domain( "smoke" "drink" );
+
+add-normal-domain( "pet" "select p.pet_id from pet p where p.pet_id not in ( select t.pet_id from tuple t ) and p.pet_id not in ( select hr.pet_id from house_relations hr where ((hr.house_id is not null and hr.house_id <> %s) or ( hr.color_id is not null and hr.color_id <> %s ) or ( hr.nat_id is not null and hr.nat_id <> %s ) or ( hr.drink_id is not null and hr.drink_id <> %s ) or ( hr.smoke_id is not null and hr.smoke_id <> %s )) and hr.pet_id is not null ) and p.pet_id in (select hr.pet_id from house_relations hr, (select count(hr.pet_id) as num from house_relations hr where hr.pet_id is not null and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s or hr.drink_id = %s or hr.smoke_id = %s) ) as numcolors where ( hr.pet_id is not null and numcolors.num = 1 and (hr.house_id = %s or hr.color_id = %s or hr.nat_id = %s or hr.drink_id = %s or hr.smoke_id = %s)) or ( 0 = numcolors.num )) and p.pet_id not in (select hr2.pet_id from house_relations hr1, tuple t, rel_next_rel rlr, house_relations hr2 where ( hr1.house_id = t.house_id or hr1.color_id = t.color_id or hr1.nat_id = t.nat_id or hr1.drink_id = t.drink_id or hr1.smoke_id = t.smoke_id or hr1.pet_id = t.pet_id ) and rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and abs(t.house_id - %s) <> 1 and hr2.pet_id is not null) and p.pet_id not in( select hr2.pet_id from house_relations hr1, rel_next_rel rlr, house_relations hr2 where rlr.rel_id_1 = hr1.rel_id and rlr.rel_id_2 = hr2.rel_id and (hr1.house_id = %s or hr1.color_id = %s or hr1.nat_id = %s or hr1.drink_id = %s or hr1.smoke_id = %s) and hr2.pet_id is not null )" );
+add-argument-to-domain( "pet" "house" );
+add-argument-to-domain( "pet" "color" );
+add-argument-to-domain( "pet" "nationality" );
+add-argument-to-domain( "pet" "drink" );
+add-argument-to-domain( "pet" "smoke" );
+add-argument-to-domain( "pet" "house" );
+add-argument-to-domain( "pet" "color" );
+add-argument-to-domain( "pet" "nationality" );
+add-argument-to-domain( "pet" "drink" );
+add-argument-to-domain( "pet" "smoke" );
+add-argument-to-domain( "pet" "house" );
+add-argument-to-domain( "pet" "color" );
+add-argument-to-domain( "pet" "nationality" );
+add-argument-to-domain( "pet" "drink" );
+add-argument-to-domain( "pet" "smoke" );
+add-argument-to-domain( "pet" "house" );
+add-argument-to-domain( "pet" "house" );
+add-argument-to-domain( "pet" "color" );
+add-argument-to-domain( "pet" "nationality" );
+add-argument-to-domain( "pet" "drink" );
+add-argument-to-domain( "pet" "smoke" );
+
+add-direct-assertion( "insert into tuple( house_id, color_id, nat_id, drink_id, smoke_id, pet_id ) values ( %s, %s, %s, %s, %s, %s )" "delete from tuple where house_id = %s and color_id = %s and nat_id = %s and drink_id = %s and smoke_id = %s and pet_id = %s" "house" "color" "nationality" "drink" "smoke" "pet" );
+
+set-tuple-order( "house" "color" "nationality" "drink" "smoke" "pet" );
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "5" );
+
+post-goal( "insert into solution select %s, %s, house_id, color_id, nat_id, drink_id, smoke_id, pet_id from tuple" );
+
+set-output-graph-file( "/home/gt/Desktop/sets.dot" );
+go();

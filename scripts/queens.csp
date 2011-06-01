@@ -1,0 +1,15 @@
+
+init-knowledge( "jdbc:mysql:///nqueens" "root" "root" );
+
+add-iterative-domain( "queencol" "SELECT qc.id FROM queens_column qc WHERE qc.taken = 0" );
+add-normal-domain( "queenrow" "select qc1.id from queens_column qc1 where qc1.id not in (select distinct(qc2.id) from queens_column qc2, queens_column qc3 where qc3.sum1 = ( %s + qc2.id )) and qc1.id not in (select distinct(qc2.id) from queens_column qc2, queens_column qc3 where qc3.sum2 = ( 9 - %s + qc2.id )) and qc1.id not in ( select qc4.row from queens_column qc4 where qc4.row <> 0)" );
+add-argument-to-domain( "queenrow" "queencol" );
+add-argument-to-domain( "queenrow" "queencol" );
+
+add-direct-assertion( "UPDATE queens_column SET taken=1, sum1 = ( %s + %s ), sum2 = ( 9 - %s + %s ), row = %s WHERE id = %s" "UPDATE queens_column SET taken=0, sum1 = 0, sum2 = 0, row = 0 WHERE id = %s" "queencol" "queenrow" "queencol" "queenrow" "queenrow" "queencol" );
+
+set-tuple-order( "queencol" "queenrow" );
+
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "8" );
+set-output-graph-file( "/home/gt/Desktop/queens.dot" );
+go();

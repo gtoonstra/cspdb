@@ -1,0 +1,29 @@
+
+init-knowledge( "jdbc:mysql:///scheduling" "root" "root" );
+
+add-iterative-domain( "timeslot" "select distinct( t1.timeslot_id ) from timeslot t1, professor p where p.prof_id not in ( select pna.prof_id from prof_not_available pna where pna.timeslot_id = t1.timeslot_id ) and p.prof_id not in ( select plat.prof_id from professor_lectures_at_time plat where plat.timeslot_id = t1.timeslot_id )" );
+
+add-normal-domain( "prof" "select p.prof_id from professor p where p.prof_id not in ( select plat.prof_id from professor_lectures_at_time plat where plat.timeslot_id = %s ) and p.prof_id not in ( select pna.prof_id from prof_not_available pna where pna.timeslot_id = %s )" );
+add-argument-to-domain( "prof" "timeslot" );
+add-argument-to-domain( "prof" "timeslot" );
+
+add-normal-domain( "course" "select c.course_id from course c, prof_can_lecture_course pclc, course_provided cp where pclc.course_id = c.course_id and cp.course_id = c.course_id and pclc.prof_id = %s and cp.num_times < c.frequency and c.course_id not in ( select distinct( shc2.course_id ) from student_has_course shc2, student_has_course shc1, course_at_time cat where cat.timeslot_id = %s and shc1.course_id = cat.course_id and shc2.student_id = shc1.student_id )" );
+add-argument-to-domain( "course" "prof" );
+add-argument-to-domain( "course" "timeslot" );
+
+add-normal-domain( "room" "select r.room_id from room r, faculty_has_room fhr, faculty_provides_course fpc where r.room_id = fhr.room_id and fhr.faculty_id = fpc.faculty_id and fpc.course_id = %s and r.room_id not in ( select riu.room_id from room_in_use riu where riu.timeslot_id = %s )" );
+add-argument-to-domain( "room" "course" );
+add-argument-to-domain( "room" "timeslot" );
+
+add-direct-assertion( "insert into room_in_use ( room_id, timeslot_id ) values ( %s, %s )" "delete from room_in_use where room_id = %s and timeslot_id = %s" "room" "timeslot" );
+add-direct-assertion( "insert into professor_lectures_at_time( prof_id, timeslot_id ) values ( %s, %s )" "delete from professor_lectures_at_time where prof_id = %s and timeslot_id = %s" "prof" "timeslot" );
+add-direct-assertion( "insert into course_at_time( course_id, timeslot_id ) values ( %s, %s )" "delete from course_at_time where course_id = %s and timeslot_id = %s" "course" "timeslot" );
+add-incremental-assertion( "update course_provided cp set cp.num_times = %2$s where cp.course_id = %1$s" "select num_times from course_provided where course_id = %s" "course" );
+add-direct-assertion( "insert into tuple( room_id, course_id, prof_id, timeslot_id ) values ( %s, %s, %s, %s )" "delete from tuple where room_id = %s and course_id = %s and prof_id = %s and timeslot_id = %s" "room" "course" "prof" "timeslot" );
+
+set-tuple-order( "timeslot" "room" "course" "prof" );
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "5" );
+post-goal( "insert into solution select %s, %s, room_id, course_id, prof_id, timeslot_id from tuple" );
+set-score( "com.blogspot.radialmind.csp.score.SchedulingScore" );
+set-output-graph-file( "/home/gt/Desktop/sets.dot" );
+go();
