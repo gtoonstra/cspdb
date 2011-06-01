@@ -13,7 +13,7 @@ This is the easiest, so we start with this. See the script file "nqueens.csp", t
   * _add-iterative-domain_ is the same as _add-normal-domain_. It used to do something different. Adding a domain means that a new required variable is added to the tuples that you wish to form. In this example, a tuple is formed by a column and a row. This adds the "row" domain, the row number that must be assigned for the placement of a queen.
   * _add-normal-domain_ adds the column domain. The first parameter is the domain name (how you refer to values picked from that domain in the rest of the script). The other is the SQL query with which to query the values that can still be assigned during the progression.
   * _add-argument-to-domain_ assigns, in order, the values that have to be assigned to the open parameters in the SQL query for the domain query. If there are multiple variables, but they are to be filled by the same source variable, you should still duplicate the line.
-  * _add-direct-assertion_ makes an "assertion" once a valid tuple is formed. This updates the state in the database, such that new domain queries after the tupelization return valid values from the domain.
+  * _add-direct-assertion_ makes an "assertion" once a valid tuple is formed. This updates the state in the database, such that new domain queries after the tupelization return valid values from the domain. It is composed of two parts. One to update the state for the tupelization, the other to undo the state if the tupelization is invalid.
   * _set-tuple-order_ defines the ordering mechanism for the produced tuples. In this case, order by column and if that is equal, by row next.
   * The goal is a standard "num tuples". This means that after, in this case, *8* tuples the solution is found. The standard engine continues to search other possible solutions until exhaustion.
   * The output graph file is a 'dot' file, which you can post-process with *graphviz*. This allows you to analyze the solutions further. This helps sometimes to find additional optimizations.
@@ -30,3 +30,9 @@ The second query starts by eliminating all values for rows, where the sum of the
 The other clause looks at the other diagional. The final clause looks at rows that have already been chosen, so we don't assign the same row id twice.
 
 The result is an nqueens solver that functionally works equivalent. Bench marks with C solutions show the performance is really poor however and it would be incredibly difficult to make this much more efficient due to the numerical nature of this problem and the relatively low number of variables.
+
+= TSP =
+
+I just noticed the SQL file for TSP is missing. Basically, this example is a TSP solver, not a TSP optimizer. In order to find the best route, you should do a query across a solution and find the solution where the total distance is shortest. If the number of cities is 12991, give this engine some time to run :). 
+
+The queries work the same way. It selects any city not yet visited. Then it selects another city which is not equal to the one just chosen and which does not yet occur on any current route between cities.
