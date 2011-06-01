@@ -1,0 +1,14 @@
+
+init-knowledge( "jdbc:mysql:///tsp" "root" "root" );
+
+add-iterative-domain( "city1" "select c.id from city c where c.id not in ( select id_1 from route )" );
+add-normal-domain( "city2" "select id from city where id not in ( select id_2 from route ) and id not in ( select id_1 from route ) and city.id <> %s" );
+add-argument-to-domain( "city2" "city1" );
+
+add-direct-assertion( "INSERT INTO route ( id_1, id_2, distance ) select %s, %s, distance from city_distance cd where cd.id_1 = %s and cd.id_2 = %s" "DELETE FROM route where id_1 = %s and id_2 = %s" "city1" "city2" "city1" "city2" );
+add-direct-assertion( "UPDATE city_visited set visited = visited + 1 where id = %s" "UPDATE city_visited set visited = visited - 1 where id = %s" "city1" );
+add-direct-assertion( "UPDATE city_visited set visited = visited + 1 where id = %s" "UPDATE city_visited set visited = visited - 1 where id = %s" "city2" );
+
+set-goal( "com.blogspot.radialmind.csp.goals.NumTupleGoal" "3" );
+set-output-graph-file( "/home/gt/Desktop/tsp.dot" );
+go();
