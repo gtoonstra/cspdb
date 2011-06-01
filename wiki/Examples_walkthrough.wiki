@@ -19,4 +19,14 @@ This is the easiest, so we start with this. See the script file "nqueens.csp", t
   * The output graph file is a 'dot' file, which you can post-process with *graphviz*. This allows you to analyze the solutions further. This helps sometimes to find additional optimizations.
   * _go_ just starts the engine.
 
-After every tupelization is made, the domain query is executed again. It needs to find, for the next tupelization, the valid values that can be assigned to the variable in question, depending on the progression/state of the solution so far. The columns are easy. This is the 
+After every tupelization is made, the domain query is executed again. It needs to find, for the next tupelization, the valid values that can be assigned to the variable in question, depending on the progression/state of the solution so far. The first one is usually easiest. 
+
+In this case, the query says to find the id's of all columns that are not yet taken. The other domain then becomes constrained by the choice made in the first domain. During the execution, the tupelization makes a choice of a domain and only then executes the query for the next domain choices. Thus, we should assume that a column has already been chosen.
+
+The next row is the result of a large time of analysis and try-outs on the problem. When using this engine, you'll notice how well you start understanding the problem itself and how the better understanding of the problem helps you to become smarter in finding a useful solution.
+
+The second query starts by eliminating all values for rows, where the sum of the current column plus any row value already allocated to a row produces the same sum (this is a handy way to find all queens on a diagonal). The sum of the col+row is stored along in the database, which is a great example of how you can use extra generated variables to optimize queries further (so you don't need to recalculate them every time, they don't change per tuple/assignment).
+
+The other clause looks at the other diagional. The final clause looks at rows that have already been chosen, so we don't assign the same row id twice.
+
+The result is an nqueens solver that functionally works equivalent. Bench marks with C solutions show the performance is really poor however and it would be incredibly difficult to make this much more efficient due to the numerical nature of this problem and the relatively low number of variables.
