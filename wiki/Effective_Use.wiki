@@ -8,18 +8,18 @@ Constraint Satisfaction Problems can be found everywhere. Typical IT application
 
 The complexity of CSP lies in maintaining the state of domains and variables as you progress towards a solution. A simple exercise for a university schedule demonstrates the high number of constraints that must be satisfied:
 
-* Students sign up for a course, but cannot attend more than one course at the same time.
-* Courses must be taught n number of times per time frame.
-* Lecturers are able to provide a course, but cannot lecture more than one course at the same time.
-* Only one course can be taught in a classroom at the same time.
+  * Students sign up for a course, but cannot attend more than one course at the same time.
+  * Courses must be taught n number of times per time frame.
+  * Lecturers are able to provide a course, but cannot lecture more than one course at the same time.
+  * Only one course can be taught in a classroom at the same time.
 
 So as you take steps towards a solution, you start to make so-called 'tupelizations' of the values of: "signed-up-students" + "classroom" + "lecturer". This prohibits future tupelizations that can be made, so your initial choice of a combination of these domains impacts your future possible choices, possibly prohibiting a valid end solution, or not allowing you to find a solution at all.
 
 For this reason, you'll need to find methods in SQL that:
 
-* Either allow you to find one single solution that you accept (no guarantee of optimal), *or* iterate through all possible solutions.
-* Favour combinations that are least-constraining towards the end (reduces time for finding solutions)
-* Favour choices that are guaranteed to be more optimal first, rather than later.
+  * Either allow you to find one single solution that you accept (no guarantee of optimal), *or* iterate through all possible solutions.
+  * Favour combinations that are least-constraining towards the end (reduces time for finding solutions)
+  * Favour choices that are guaranteed to be more optimal first, rather than later.
 
 The last one is not always possible.
 
