@@ -74,3 +74,17 @@ The room query is simple, but I added the complexity that not all rooms in a uni
 If this completes, the assertions are made. The incremental assertion does a select query first to get a number, then updates the current state with the update query+1. The assertion when backtracking applies - 1.
 
 The post-goal once again provides the ability to collect all possible solutions. The set-score function allows you to score each solution separately for desirability. Here, it's favouring solutions where courses follow up one another (2-hour session) and where the room doesn't change and where students do not lose hours inbetween (all sessions are consecutive). Obviously, in real life situations, you'd typically make this much more elaborate and you'd do a more adequate desirability evaluation. (six hours math in one go isn't anybody's idea of fun). 
+
+= Zebra =
+
+The most bizarre application of this CSP engine is the Zebra puzzle (see Wikipedia link left). This is a logic puzzle that is relatively easy to solve using Prolog.
+
+Now, in previous examples, things were pretty simple, because the queries are simple: "no more than x", or "where does not exist any other ...", and so on.
+
+In this logic puzzle, some queries end up to be extremely complex for SQL: "Next to house 1, no red...", "next to green house, a bird...", etc. Such queries are extremely arcane to work with.
+
+This example starts with the selection of a house. The houses have id's and these acutally relate to the first, second, third, etc.. house. There are no tuples to start with, so any house you pick will do.
+
+Then all the predicates related to house color follow. As more and more information becomes available for a particular tuple, the 15 predicates start having more influence on the constraint verification. So the last query is extremely arcane, since that's where the most information is known to the currently selected tuple. 
+
+The subqueries basically test for all constraints at the same time. So if you chose 'green' and 'water', then this test may come up with an empty set for the domain, causing a backtrack and 'water' or 'green' will change for the next round. I'll leave it up to the reader to wade through the madness of the implementation.
