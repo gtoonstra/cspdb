@@ -18,9 +18,9 @@ So as you take steps towards a solution, you start to make so-called 'tupelizati
 For this reason, you'll need to find methods in SQL that:
 
   * Either allow you to find one single solution that you accept (no guarantee of optimal), *or* iterate through all possible solutions.
-  * Favour combinations that are least-constraining towards the end (reduces time for finding solutions)
-  * Favour choices that are guaranteed to be more optimal first, rather than later.
+  * Favour domains that have least choices, because this reduces backtracking heavily and thus reduces time for finding solutions.
+  * Favour choices that are likely more optimal (heuristics).
 
-The last one is not always possible.
+The last one is a difficult problem by itself.
 
 The examples already demonstrate how you can approach these problems. As the engine is relatively slow in comparison with engines that brute-force through combinations, it pays off to be more clever to 
