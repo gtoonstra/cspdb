@@ -33,6 +33,44 @@ The result is an nqueens solver that functionally works equivalent. Bench marks 
 
 = TSP =
 
-I just noticed the SQL file for TSP is missing. Basically, this example is a TSP solver, not a TSP optimizer. In order to find the best route, you should do a query across a solution and find the solution where the total distance is shortest. If the number of cities is 12991, give this engine some time to run :). 
+I just noticed the SQL file for TSP is missing. This example is a TSP solver, not a TSP optimizer. In order to find the best route, you should do a query across a solution and find the solution where the total distance is shortest. If the number of cities is 12991, give this engine some time to run :). 
 
 The queries work the same way. It selects any city not yet visited. Then it selects another city which is not equal to the one just chosen and which does not yet occur on any current route between cities.
+
+Because the only constraint is that you can't visit a city more than twice, leaving this engine running will find all possible combinations that can be made. It stores them in the database, where you can do the query on the least distance for optimization purposes. If you want to optimize earlier, you should perform order-by queries yourself, although that would be a naive optimizer. I've studied the TSP for quite a while. The easier ones are the paths that have the cities in a circle. But consider moving through Norway or Sweden. Is the shortest path the one where you zig-zag east/west towards the north, or could it well be a path that runs north/south three times?
+
+The latter thing demonstrates that you could theoretically have cities that are really close to one another, but are separated by a separate path on the 'downward' end of the entire track. Without that particular track, the total distance would always be higher.
+
+The TSP doesn't yet solve any requirements with regards to maximum load in the truck, load/unload optimizations, righthand/lefthand turns, etc. So the real academical problem is significantly more complicated than just finding the shortest path and is also a problem over time.
+
+
+= Sudoku =
+
+Sudoku has two solutions. One is a naive version, which runs significantly longer. The other one has been developed after a bit of longer thinking.
+
+The naive solution just finds places where it can place particular numbers and tries them one after the other. So it develops an idea of what the possibilities are, but does a lot of backtracking in the end before it solves the puzzle.
+
+The "post-goal" inserts every goal it finds into the database. Not having this statement would just print out the solution to 'stdout'.
+
+The SQL query for Sudoku is a rather arcane query. The "my_values" table is just there to have a list of possible values to assign to some cell. The first two queries are heavy optimizations on the standard case. It finds the columns that have least possible assignments of values and then orders these from low to high. This means that if there are columns and rows for which only one assignment is possible, these are taken out first. The naive version doesn't do this optimization and starts anywhere it can.
+
+The way it works is that it does a query, grouped by column or row, eliminating all numbers that have already been assigned to the column, row or block. The remaining options are then grouped together and you get a 'column' for which there is a cell where there is only 1 option possible for example. The row does the same query and finds the correct row number to apply. The 'block' query is just to get the correct block number to assign to the tuple. The "possibilities" query provides the possible variables that can be assigned to that particular cell. The latter domain and the first domain are the only domains that may have multiple values to choose from.
+
+
+= Scheduling =
+
+The scheduling example was the first thing I worked on with this engine. I added some more complexity afterwards and it still resolves things correctly. You should remove some 'where' statements here or there to see the impact of a more 'brute-force' solution. 
+
+The 'timeslot' query finds a timeslot where there's a professor still available for that time. The "prof_not_available" table is a table where professors may indicate they're not available for lectures. 
+
+When such a timeslot exists, the professors are found that are available for lectures within that timeslot, but only if they're not already lecturing at that time. ( a possible improvement is to cross-verify this with the courses, when all courses by that professor have already been taught ). 
+
+The course query is complicated. It finds all courses that this professor can/may lecture and eliminates those courses, where students are taking this course and some other course being taught around the same time. (since students cannot be in more than one classroom at the same time). Courses are also eliminated which have already been taught the required amount of times.
+
+So, at this point there's a timeslot with a professor and a course that should still be taught and where all students taking the course can attend.
+
+The room query is simple, but I added the complexity that not all rooms in a university are typically used by any course. So rooms are assigned to faculties (more than one?), so only those rooms are chosen that can be used by the faculty offering the course, at that timeslot of course.
+
+If this completes, the assertions are made. The incremental assertion does a select query first to get a number, then updates the current state with the update query+1. The assertion when backtracking applies - 1.
+
+The post-goal once again provides the ability to collect all possible solutions. The set-score function allows you to score each solution separately for desirability. Here, it's favouring solutions where courses follow up one another (2-hour session) and where the room doesn't change and where students do not lose hours inbetween (all sessions are consecutive). Obviously, in real life situations, you'd typically make this much more elaborate and you'd do a more adequate desirability evaluation. (six hours math in one go isn't anybody's idea of fun). 
