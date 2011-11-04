@@ -23,4 +23,4 @@ For this reason, you'll need to find methods in SQL that:
 
 The last one is a difficult problem by itself.
 
-The examples already demonstrate how you can approach these problems. As the engine is relatively slow in comparison with engines that brute-force through combinations, it pays off to be more clever to 
+The examples already demonstrate how you can approach these problems. As the engine is relatively slow in comparison with engines that brute-force through combinations, it pays off to be more clever. That is.. tupelization of variable combinations are relatively costly and the database is naturally very good at indexing, searching and retrieving values.
