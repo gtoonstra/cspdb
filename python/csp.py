@@ -45,8 +45,8 @@ class CSP(object):
 #                    pdb.set_trace()
                     self.do_retract()
             else:
-                if self.topdomain.stack_size() == 0:
-                    break
+#                if self.topdomain.stack_size() == 0:
+#                    break
                 if not self.do_retract():
                     break
 
@@ -62,7 +62,8 @@ class CSP(object):
         if domain.stack_size() < len( self.stack ):
             domain.push_generator()
 
-        if domain.stack_size() == 0:
+        if (domain.stack_size() == 0) and (domain.curgen == None):
+#            print "refresh generator", domain.stack_size(), domain.curvals, domain.curgen
             domain.refresh_generator()
  
 #        print "recurse: %s=%d" % (dname, domain.stack_size() ), domain.taken

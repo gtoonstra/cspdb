@@ -26,8 +26,10 @@ class Domain( object ):
         self.curval = None        
 
     def pop_generator(self):
-        self.curgen = self.generators.pop()
-        self.curval = self.curvals.pop()
+        if len(self.generators) > 0:
+            self.curgen = self.generators.pop()
+        if len(self.curvals) > 0:
+            self.curval = self.curvals.pop()
 
     def clear_curval(self):
         self.curval = None
