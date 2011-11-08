@@ -18,6 +18,7 @@ from csp import CSP
 from queencol import QueenCol
 from queenrow import QueenRow
 from takenassertion import TakenAssertion
+from queensgoal import QueensGoal
 
 logger = logging.getLogger( "NQueens" )
 
@@ -33,4 +34,5 @@ if __name__ == "__main__":
     problem.add_domain( "queencol", QueenCol() )
     problem.add_domain( "queenrow", QueenRow() )
     problem.add_assertion( TakenAssertion() )
+    problem.set_goal( QueensGoal() )
     problem.run()
