@@ -15,14 +15,14 @@ class Domain( object ):
     def stack_size(self):
         return len(self.generators)
 
-    def push_generator(self):
+    def push_generator(self, tuple):
         self.generators.append( self.curgen )
-        self.curgen = self.get_generator()
+        self.curgen = self.get_generator( tuple )
         self.curvals.append( self.curval )
         self.curval = None
 
-    def refresh_generator(self):
-        self.curgen = self.get_generator()
+    def refresh_generator(self, tuple):
+        self.curgen = self.get_generator( tuple )
         self.curval = None        
 
     def pop_generator(self):

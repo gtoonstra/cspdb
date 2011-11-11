@@ -31,8 +31,9 @@ print __name__
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     problem = NQueens()
-    problem.add_domain( "queencol", QueenCol() )
-    problem.add_domain( "queenrow", QueenRow() )
+    num = 8
+    problem.add_domain( "queencol", QueenCol(range(1,num+1)) )
+    problem.add_domain( "queenrow", QueenRow(range(1,num+1)) )
     problem.add_assertion( TakenAssertion() )
-    problem.set_goal( QueensGoal() )
+    problem.set_goal( QueensGoal( num ) )
     problem.run()
