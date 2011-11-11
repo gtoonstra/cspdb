@@ -32,6 +32,7 @@ class CSP(object):
 
     def run(self):
         
+        solutions = 0
         while True:
             ret = False
             tuple = Tuple()
@@ -39,16 +40,17 @@ class CSP(object):
             if ret:
                 self.assertTuple( tuple )
                 self.stack.append( tuple )
-                print tuple
                 if self.goal.goal_reached():
                     print "goal reached..."
-#                    pdb.set_trace()
+                    solutions += 1
+                    for tuple in self.stack:
+                        print tuple
                     self.do_retract()
             else:
-#                if self.topdomain.stack_size() == 0:
-#                    break
                 if not self.do_retract():
                     break
+                
+        print "%d solutions found" % solutions
 
     def recurse_domains(self, dnames, tuple):
         try:
@@ -60,11 +62,11 @@ class CSP(object):
         domain = self.domains[ dname ]
 
         if domain.stack_size() < len( self.stack ):
-            domain.push_generator()
+            domain.push_generator( tuple )
 
         if (domain.stack_size() == 0) and (domain.curgen == None):
 #            print "refresh generator", domain.stack_size(), domain.curvals, domain.curgen
-            domain.refresh_generator()
+            domain.refresh_generator( tuple )
  
 #        print "recurse: %s=%d" % (dname, domain.stack_size() ), domain.taken
  
@@ -106,6 +108,4 @@ class CSP(object):
             return False
         mostRecentTuple = self.stack.pop()
         self.retractTuple( mostRecentTuple )
-#        for dname, domain in self.domains.iteritems():
-#            domain.pop_generator()
         return True
