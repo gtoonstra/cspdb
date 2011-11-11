@@ -50,7 +50,6 @@ class SudokuCell( Domain ):
                     except KeyError as ie:
                         result[ idx ] = (col, row, block, 1)
 
-        print "---"
-        for key, (col,row,block,count) in sorted(result.iteritems(), key=lambda (k,(c,r,b,v)): (v,(c,r,b,k))):
-            print col, row, block, count
+        for key, (col,row, block, count) in sorted(result.iteritems(), key=lambda (k,(c,r,b,v)): (v,(c,r,b,k))):
+            print key, col, row, block, count
             yield (col, row, block)

@@ -33,15 +33,11 @@ class Sudoku(CSP):
         for row in problemReader:
             if len(row) == 0:
                 continue
-            # row[ 0 ] == col
-            # row[ 1 ] == row
-            # row[ 2 ] == block
-            # row[ 3 ] == value
             tuple = Tuple()
             a = int(row.pop())
-            b = int(row.pop())
             r = int(row.pop())
             c = int(row.pop())
+            b = (((r-1)/3) * 3) + ((c-1)/3) + 1
             tuple.cell = (c, r, b)
             tuple.assignment = a
             self.stack.append( tuple )
