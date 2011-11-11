@@ -33,7 +33,6 @@ class SudokuAssignment( Domain ):
          or ( nc.col <> %s OR nc.row <> %s ) or ( nc.mynum = 0 ) )"""
 
     def get_generator(self, tuple):
-        result = []
         col, row, block = tuple.cell
 
         for assignment in self.assignments:
