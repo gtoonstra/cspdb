@@ -65,13 +65,9 @@ class CSP(object):
             domain.push_generator( tuple )
 
         if (domain.stack_size() == 0) and (domain.curgen == None):
-#            print "refresh generator", domain.stack_size(), domain.curvals, domain.curgen
             domain.refresh_generator( tuple )
  
-#        print "recurse: %s=%d" % (dname, domain.stack_size() ), domain.taken
- 
         for value in domain.get_values():
-#            print "%s=%d @ stack=%d" %(dname, value, domain.stack_size())
             if value == None:
                 return False 
             setattr( tuple, dname, value )
