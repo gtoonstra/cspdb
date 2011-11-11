@@ -25,7 +25,7 @@ logger = logging.getLogger( "NQueens" )
 class NQueens(CSP):
     def __init__(self):
         super( NQueens, self ).__init__()
-        logger.info( "Lol" )
+        logger.info( "NQueens" )
 
 print __name__
 if __name__ == "__main__":
