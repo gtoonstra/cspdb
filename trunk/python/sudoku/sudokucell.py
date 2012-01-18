@@ -33,14 +33,12 @@ class SudokuCell( Domain ):
                 include = True
                 for t in self.csp.stack:
                     xcol, xrow, xblock = t.cell
-                    if xcol == col and xrow == row and xblock == block:
-                        include = False
-                        break
                     if xcol != col and xrow != row and xblock != block:
                         continue
-                    if t.assignment == assignment:
-                        include = False
-                        break
+                    if xcol == col or xrow == row or xblock == block:
+                        if t.assignment == assignment:
+                            include = False
+                            break
 
                 if include:
                     idx = col * 10 + row
@@ -51,5 +49,4 @@ class SudokuCell( Domain ):
                         result[ idx ] = (col, row, block, 1)
 
         for key, (col,row, block, count) in sorted(result.iteritems(), key=lambda (k,(c,r,b,v)): (v,(c,r,b,k))):
-            print key, col, row, block, count
             yield (col, row, block)
