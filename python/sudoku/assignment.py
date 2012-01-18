@@ -39,14 +39,12 @@ class SudokuAssignment( Domain ):
             include = True
             for t in self.csp.stack:
                 xcol, xrow, xblock = t.cell
-                if xcol == col and xrow == row and xblock == block:
-                    include = False
-                    break
                 if xcol != col and xrow != row and xblock != block:
                     continue
-                if t.assignment == assignment:
-                    include = False
-                    break
+                if xcol == col or xrow == row or xblock == block:
+                    if t.assignment == assignment:
+                        include = False
+                        break
 
             if include:
                 yield assignment
