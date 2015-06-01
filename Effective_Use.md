@@ -1,0 +1,24 @@
+# Introduction #
+
+Constraint Satisfaction Problems can be found everywhere. Typical IT applications face about 2-3 constraints in a particular domain, making it trivial to solve by a number of iterations or smart queries. This engine was written to allow you to find all solutions for a particular problem set, hiding the details of maintaining the state at each step in the process.
+
+# Details #
+
+The complexity of CSP lies in maintaining the state of domains and variables as you progress towards a solution. A simple exercise for a university schedule demonstrates the high number of constraints that must be satisfied:
+
+  * Students sign up for a course, but cannot attend more than one course at the same time.
+  * Courses must be taught n number of times per time frame.
+  * Lecturers are able to provide a course, but cannot lecture more than one course at the same time.
+  * Only one course can be taught in a classroom at the same time.
+
+So as you take steps towards a solution, you start to make so-called 'tupelizations' of the values of: "signed-up-students" + "classroom" + "lecturer". This prohibits future tupelizations that can be made, so your initial choice of a combination of these domains impacts your future possible choices, possibly prohibiting a valid end solution, or not allowing you to find a solution at all.
+
+For this reason, you'll need to find methods in SQL that:
+
+  * Either allow you to find one single solution that you accept (no guarantee of optimal), **or** iterate through all possible solutions.
+  * Favour domains that have least choices, because this reduces backtracking heavily and thus reduces time for finding solutions.
+  * Favour choices that are likely more optimal (heuristics).
+
+The last one is a difficult problem by itself.
+
+The examples already demonstrate how you can approach these problems. As the engine is relatively slow in comparison with engines that brute-force through combinations, it pays off to be more clever. That is.. tupelization of variable combinations are relatively costly and the database is naturally very good at indexing, searching and retrieving values.

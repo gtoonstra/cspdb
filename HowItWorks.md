@@ -1,0 +1,56 @@
+# Introduction #
+
+The engine works by reading a script file, which embodies the problem you're trying to solve. CSP's are characterized by finding a valid range of tupelizations across a number of variable domains that do not violate the imposed constraints. Most CSP's just solve the problem "logically" (they provide a number of possible solutions) and cannot give you any indication of the desirability (optimum) of these solutions. In this engine though, you can walk through the range of tuples that were found and set up a scoring algorithm for them. Or you can do that using a really smart query in your database. Whichever you choose depends on how much context you need to do the scoring.
+
+# Details #
+
+## Starting up the engine ##
+
+The first thing the engine does when it starts up is read the script file that you created, detailing the problem at hand. At the top of the file is the line that allows the engine to connect to a database, hosting the pre-created tables and initial population of the tables which form the details of the problem.
+
+So, if you're trying to solve a university schedule, you'd create tables for a lecturer, students, classrooms and a couple of "housekeeping" tables for maintaining the state in an easier representation for optimization and clarity. The tables are populated with the students + lecturers + classrooms (or perhaps copied from a master copy) and the engine with a newer script file or scoring mechanism is run.
+
+## Domains and variables ##
+
+The scripts contain some keywords that look a bit puzzling at first. A CSP solver typically uses the concept of a domain ( a collection of possible values for a particular variable, those values that the variable can represent, but only one of those values at each time ). A domain is basically the collection of all lecturers that can be assigned for any course, etc.
+
+Solving the CSP is then retrieving all values for a particular domain at a particular progression towards a solution. At the beginning, this will be all values for that domain. As soon as some tuples are formed (lecturerA+classroomX+TimeFrame1), the exact assignments for the next tuples will already have reduced. Also, the value assigned in the first domain assessed for the tupelization will already impose constraints for the next variables.
+
+Example:
+  * Choose lecturer A from the (what happens to be) the first domain in your script
+  * Having chosen lecturer A, we know that this lecturer can only teach Math, so only one possible allocation for "course" can be made in the next domain.
+  * A valid timeframe for math + lecturer A is timeframe 12.
+  * Math requires students X/Y/Z. These are available in timeframe 12, so the tupelization is valid.
+
+As soon as a tuple is invalid, the engine backtracks to the previous domain:
+
+Example:
+  * Choose lecturer A from the (what happens to be) the first domain in your script
+  * Having chosen lecturer A, we know that this lecturer can only teach Math, so only one possible allocation for "course" can be made in the next domain.
+  * Valid timeframes for math + lecturer\_A are timeframes 12+13. Let's start with 12.
+  * Math requires students X/Y/Z. However, student X is not available in that timeframe 12.
+  * The engine backtracks to timeframe 12, removes 12, assigns 13 and continues.
+  * If all students are available, then this is a valid tupelization.
+  * If another problem occurs, the engine backtracks to timeframes. It sees no other timeframe assignments can be made and backtracks further to Math. Since no other assignments are left in that domain either, it backtracks to lecturers.
+
+Possibly, this latter example results in not finding a solution. If no further tupelizations can be made and no solution was found yet, the engine will remove the latest tupelization found so far and within the context of that tupelization try other values.
+
+## State management ##
+
+This is what is meant with **state management** in the complexity of the CSP engine. The engine basically executes a depth-first search to find a number of tupelizations to make (other goal conditions can be set). If it finds a condition where a domain is _empty_, it backtracks to the other domain, tries the next, until all domains for that tuple are empty. It is eventually clear that with the current progression, no valid assignments are possible. So the engine is required to remove the latest tuple assigned so far and having that cleared, try out the next possible assignment within that previous context. This may clear a timeframe, classroom or lecturer holding up a valid future assignment and solution.
+
+This was the point for making this engine. The logic engines are theoretically sound for finding solutions, but are really cumbersome for ordering results in complicated ways, such that knowingly good combinations of values can be explored first.
+
+## Tips ##
+
+  * Start with the smallest domain (with the least values), which must also be a domain that is reasonably constraining for other domains in the same tupelization. Since backtracking is costly, a domain that typically has three values to assign is a good starter. Especially when this domain is constraining other domains in the same tupelization (timeframe constraining lecturer choices and student choices), you prevent a lot of backtracking that way.
+
+  * If you have the possibility of finding out tupelizations that have to be made eventually, start with those. For an example, see the sudoku puzzle. In Sudoku, you typically have one or more values that must be allocated from the very start. Doing those first means less backtracking has to be done and they help to constrain future domains and tupelizations, reducing the amount of future backtracking.
+
+  * Know the cost of your SQL query. Since the query may be called quite a high number of times, you want them to be subsecond performance.
+
+  * Feel free to use "order by" if you work on a problem with a good indication of favourability of one solution over another.
+
+  * Consider reformulating the problem by inserting an initial load (tupelizations) that you already know work together and work towards a reasonable solution.
+
+  * You can also use the engine to 'complete' or 'fix' partial solutions. Maybe something broke, a rule changed, whatever. Load the still valid tupelizations in and complete the solution with the new ruleset.

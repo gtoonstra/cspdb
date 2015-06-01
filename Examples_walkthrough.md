@@ -1,0 +1,88 @@
+# Introduction #
+
+This page explains how the examples work and why the queries ended up as they are. It helps you to get a good idea about the internals of the engine and how you may optimize the problem statement and queries to gain better runtime characteristics.
+
+
+# NQueens #
+
+This is the easiest, so we start with this. See the script file "nqueens.csp", together with the database preparation file "nqueens.sql"
+
+  * _init-knowledge_ connects to the database.
+  * _add-iterative-domain_ is the same as _add-normal-domain_. It used to do something different. Adding a domain means that a new required variable is added to the tuples that you wish to form. In this example, a tuple is formed by a column and a row. This adds the "row" domain, the row number that must be assigned for the placement of a queen.
+  * _add-normal-domain_ adds the column domain. The first parameter is the domain name (how you refer to values picked from that domain in the rest of the script). The other is the SQL query with which to query the values that can still be assigned during the progression.
+  * _add-argument-to-domain_ assigns, in order, the values that have to be assigned to the open parameters in the SQL query for the domain query. If there are multiple variables, but they are to be filled by the same source variable, you should still duplicate the line.
+  * _add-direct-assertion_ makes an "assertion" once a valid tuple is formed. This updates the state in the database, such that new domain queries after the tupelization return valid values from the domain. It is composed of two parts. One to update the state for the tupelization, the other to undo the state if the tupelization is invalid.
+  * _set-tuple-order_ defines the ordering mechanism for the produced tuples. In this case, order by column and if that is equal, by row next.
+  * The goal is a standard "num tuples". This means that after, in this case, **8** tuples the solution is found. The standard engine continues to search other possible solutions until exhaustion.
+  * The output graph file is a 'dot' file, which you can post-process with **graphviz**. This allows you to analyze the solutions further. This helps sometimes to find additional optimizations.
+  * _go_ just starts the engine.
+
+After every tupelization is made, the domain query is executed again. It needs to find, for the next tupelization, the valid values that can be assigned to the variable in question, depending on the progression/state of the solution so far. The first one is usually easiest.
+
+In this case, the query says to find the id's of all columns that are not yet taken. The other domain then becomes constrained by the choice made in the first domain. During the execution, the tupelization makes a choice of a domain and only then executes the query for the next domain choices. Thus, we should assume that a column has already been chosen.
+
+The next row is the result of a large time of analysis and try-outs on the problem. When using this engine, you'll notice how well you start understanding the problem itself and how the better understanding of the problem helps you to become smarter in finding a useful solution.
+
+The second query starts by eliminating all values for rows, where the sum of the current column plus any row value already allocated to a row produces the same sum (this is a handy way to find all queens on a diagonal). The sum of the col+row is stored along in the database, which is a great example of how you can use extra generated variables to optimize queries further (so you don't need to recalculate them every time, they don't change per tuple/assignment).
+
+The other clause looks at the other diagional. The final clause looks at rows that have already been chosen, so we don't assign the same row id twice.
+
+The result is an nqueens solver that functionally works equivalent. Bench marks with C solutions show the performance is really poor however and it would be incredibly difficult to make this much more efficient due to the numerical nature of this problem and the relatively low number of variables.
+
+# TSP #
+
+I just noticed the SQL file for TSP is missing. This example is a TSP solver, not a TSP optimizer. In order to find the best route, you should do a query across a solution and find the solution where the total distance is shortest. If the number of cities is 12991, give this engine some time to run :).
+
+The queries work the same way. It selects any city not yet visited. Then it selects another city which is not equal to the one just chosen and which does not yet occur on any current route between cities.
+
+Because the only constraint is that you can't visit a city more than twice, leaving this engine running will find all possible combinations that can be made. It stores them in the database, where you can do the query on the least distance for optimization purposes. If you want to optimize earlier, you should perform order-by queries yourself, although that would be a naive optimizer. I've studied the TSP for quite a while. The easier ones are the paths that have the cities in a circle. But consider moving through Norway or Sweden. Is the shortest path the one where you zig-zag east/west towards the north, or could it well be a path that runs north/south three times?
+
+The latter thing demonstrates that you could theoretically have cities that are really close to one another, but are separated by a separate path on the 'downward' end of the entire track. Without that particular track, the total distance would always be higher.
+
+The TSP doesn't yet solve any requirements with regards to maximum load in the truck, load/unload optimizations, righthand/lefthand turns, etc. So the real academical problem is significantly more complicated than just finding the shortest path and is also a problem over time.
+
+
+# Sudoku #
+
+Sudoku has two solutions. One is a naive version, which runs significantly longer. The other one has been developed after a bit of longer thinking.
+
+The naive solution just finds places where it can place particular numbers and tries them one after the other. So it develops an idea of what the possibilities are, but does a lot of backtracking in the end before it solves the puzzle.
+
+The "post-goal" inserts every goal it finds into the database. Not having this statement would just print out the solution to 'stdout'.
+
+The SQL query for Sudoku is a rather arcane query. The "my\_values" table is just there to have a list of possible values to assign to some cell. The first two queries are heavy optimizations on the standard case. It finds the columns that have least possible assignments of values and then orders these from low to high. This means that if there are columns and rows for which only one assignment is possible, these are taken out first. The naive version doesn't do this optimization and starts anywhere it can.
+
+The way it works is that it does a query, grouped by column or row, eliminating all numbers that have already been assigned to the column, row or block. The remaining options are then grouped together and you get a 'column' for which there is a cell where there is only 1 option possible for example. The row does the same query and finds the correct row number to apply. The 'block' query is just to get the correct block number to assign to the tuple. The "possibilities" query provides the possible variables that can be assigned to that particular cell. The latter domain and the first domain are the only domains that may have multiple values to choose from.
+
+
+# Scheduling #
+
+The scheduling example was the first thing I worked on with this engine. I added some more complexity afterwards and it still resolves things correctly. You should remove some 'where' statements here or there to see the impact of a more 'brute-force' solution.
+
+The 'timeslot' query finds a timeslot where there's a professor still available for that time. The "prof\_not\_available" table is a table where professors may indicate they're not available for lectures.
+
+When such a timeslot exists, the professors are found that are available for lectures within that timeslot, but only if they're not already lecturing at that time. ( a possible improvement is to cross-verify this with the courses, when all courses by that professor have already been taught ).
+
+The course query is complicated. It finds all courses that this professor can/may lecture and eliminates those courses, where students are taking this course and some other course being taught around the same time. (since students cannot be in more than one classroom at the same time). Courses are also eliminated which have already been taught the required amount of times.
+
+So, at this point there's a timeslot with a professor and a course that should still be taught and where all students taking the course can attend.
+
+The room query is simple, but I added the complexity that not all rooms in a university are typically used by any course. So rooms are assigned to faculties (more than one?), so only those rooms are chosen that can be used by the faculty offering the course, at that timeslot of course.
+
+If this completes, the assertions are made. The incremental assertion does a select query first to get a number, then updates the current state with the update query+1. The assertion when backtracking applies - 1.
+
+The post-goal once again provides the ability to collect all possible solutions. The set-score function allows you to score each solution separately for desirability. Here, it's favouring solutions where courses follow up one another (2-hour session) and where the room doesn't change and where students do not lose hours inbetween (all sessions are consecutive). Obviously, in real life situations, you'd typically make this much more elaborate and you'd do a more adequate desirability evaluation. (six hours math in one go isn't anybody's idea of fun).
+
+# Zebra #
+
+The most bizarre application of this CSP engine is the Zebra puzzle (see Wikipedia link left). This is a logic puzzle that is relatively easy to solve using Prolog.
+
+Now, in previous examples, things were pretty simple, because the queries are simple: "no more than x", or "where does not exist any other ...", and so on.
+
+In this logic puzzle, some queries end up to be extremely complex for SQL: "Next to house 1, no red...", "next to green house, a bird...", etc. Such queries are extremely arcane to work with.
+
+This example starts with the selection of a house. The houses have id's and these acutally relate to the first, second, third, etc.. house. There are no tuples to start with, so any house you pick will do.
+
+Then all the predicates related to house color follow. As more and more information becomes available for a particular tuple, the 15 predicates start having more influence on the constraint verification. So the last query is extremely arcane, since that's where the most information is known to the currently selected tuple.
+
+The subqueries basically test for all constraints at the same time. So if you chose 'green' and 'water', then this test may come up with an empty set for the domain, causing a backtrack and 'water' or 'green' will change for the next round. I'll leave it up to the reader to wade through the madness of the implementation.
